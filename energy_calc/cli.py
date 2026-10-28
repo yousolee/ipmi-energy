@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import logging
 import sys
+from datetime import timedelta, timezone
 from typing import Sequence
 
 from .io import InputError, load_idle, load_jobs, load_samples
@@ -27,7 +29,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--method", choices=METHODS, default="trapezoid")
     p.add_argument("--attribution", choices=ATTRIBUTIONS, default="exclusive")
     p.add_argument("--max-gap", type=float, default=None,
-                   help="warn when samples are further apart than this many seconds")
+                   help="warn when samples are further apart than this many seconds "
+                        "(default: 5x the node's median sample interval)")
+    p.add_argument("--utc-offset", type=float, default=0.0,
+                   help="hours east of UTC for ISO timestamps without an offset, "
+                        "e.g. -4 for sacct output on US/Eastern in summer (default 0)")
     p.add_argument("--out", help="write per-job results CSV here (default: stdout)")
     p.add_argument("--per-node-out", help="also write a per-node breakdown CSV")
     return p
@@ -68,9 +74,11 @@ def _write(rows, cols, path: str | None) -> None:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    logging.basicConfig(level=logging.WARNING, format="warning: %(message)s")
+    naive_tz = timezone(timedelta(hours=args.utc_offset))
     try:
-        samples = load_samples(args.samples)
-        jobs = load_jobs(args.jobs)
+        samples = load_samples(args.samples, naive_tz)
+        jobs = load_jobs(args.jobs, naive_tz)
         idle = load_idle(args.idle) if args.idle else None
     except (OSError, InputError) as exc:
         print(f"error: {exc}", file=sys.stderr)

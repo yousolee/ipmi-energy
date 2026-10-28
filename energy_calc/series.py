@@ -96,6 +96,8 @@ def energy_detail(samples: SamplesLike, t_start: float, t_end: float,
     sample are *not* extrapolated; they show up as coverage < 1.
     """
     _check_method(method)
+    if not (np.isfinite(t_start) and np.isfinite(t_end)):
+        raise ValueError(f"window bounds must be finite, got ({t_start}, {t_end})")
     if t_end <= t_start:
         raise ValueError(f"t_end ({t_end}) must be after t_start ({t_start})")
     s = as_series(samples)

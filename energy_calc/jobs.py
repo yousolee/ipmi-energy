@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Mapping
 
+import numpy as np
+
 from .io import Job
 from .series import Series, energy_detail, joules_to_kwh
 
@@ -11,6 +13,8 @@ ATTRIBUTIONS = ("exclusive", "cpu_share")
 
 # Below this fraction of the job window covered by samples, a node is flagged.
 MIN_COVERAGE = 0.99
+# Without an explicit max_gap_s, flag gaps longer than this many median intervals.
+DEFAULT_GAP_FACTOR = 5.0
 
 
 def _share(job: Job, attribution: str) -> float:
@@ -37,7 +41,11 @@ def job_energy(job: Job, samples: Mapping[str, Series],
     ``idle`` is given), share, complete, warnings, and a per-node breakdown.
     """
     share = _share(job, attribution)
-    warnings: list[str] = []
+    warnings: list[str] = []   # data problems: these make the job incomplete
+    notes: list[str] = []      # caveats about the method only
+    if attribution == "cpu_share" and len(job.nodes) > 1:
+        notes.append("cpu_share on a multi-node job assumes the same CPU "
+                     "fraction on every node")
     per_node: dict[str, dict] = {}
     total = 0.0
     dynamic: float | None = 0.0 if idle is not None else None
@@ -45,7 +53,9 @@ def job_energy(job: Job, samples: Mapping[str, Series],
     for node in job.nodes:
         series = samples.get(node)
         if series is None or len(series) < 2:
-            warnings.append(f"{node}: no samples")
+            count = 0 if series is None else len(series)
+            warnings.append(f"{node}: no samples" if count == 0
+                            else f"{node}: only {count} sample")
             dynamic = None if idle is not None else dynamic
             continue
         d = energy_detail(series, job.start, job.end, method)
@@ -60,8 +70,10 @@ def job_energy(job: Job, samples: Mapping[str, Series],
         }
         if d.coverage < MIN_COVERAGE:
             warnings.append(f"{node}: samples cover {d.coverage:.1%} of the job")
-        if max_gap_s is not None and d.max_gap_s > max_gap_s:
-            warnings.append(f"{node}: gap of {d.max_gap_s:.0f}s exceeds {max_gap_s:.0f}s")
+        gap_limit = (max_gap_s if max_gap_s is not None
+                     else DEFAULT_GAP_FACTOR * float(np.median(np.diff(series.t))))
+        if d.max_gap_s > gap_limit:
+            warnings.append(f"{node}: gap of {d.max_gap_s:.0f}s exceeds {gap_limit:.0f}s")
         if idle is not None:
             if node in idle:
                 entry["dynamic_J"] = (d.energy_J - idle[node] * d.covered_s) * share
@@ -87,6 +99,6 @@ def job_energy(job: Job, samples: Mapping[str, Series],
         "avg_W": total / job.duration,
         "dynamic_J": dynamic,
         "complete": not warnings,
-        "warnings": warnings,
+        "warnings": warnings + notes,
         "per_node": per_node,
     }
