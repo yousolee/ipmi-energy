@@ -1,0 +1,185 @@
+ 
+  *  Georgia Institute of Technology - Terms of Use                                 *
+  *                                                                                 *
+  *  This computer system is the property of the Georgia Institute of Technology.   *
+  *  Any user of this system must comply with all Institute and Board of Regents    *
+  *  policies, including the Acceptable Use Policy, Cyber Security Policy and Data  *
+  *  Privacy Policy (http://b.gatech.edu/it-policies). Users should have no         *
+  *  expectation of privacy, as any and all files on this system may be             *
+  *  intercepted, monitored, recorded, copied, inspected, and/or disclosed          *
+  *  to authorized personnel in order to meet Institute obligations.                *
+  *                                                                                 *
+  *  By using this system, I acknowledge and consent to these terms.                *
+  ***********************************************************************************
+probe run at 2026-11-08T22:43:50-05:00 by ylee880 on rg-login.crnch.gatech.edu
+
+===== host =====
+$ hostname; hostname -f; uname -a
+rg-login.crnch.gatech.edu
+rg-login.crnch.gatech.edu
+Linux rg-login.crnch.gatech.edu 5.15.0-203-generic #213-Ubuntu SMP Fri Oct 23 13:21:06 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+[exit=0]
+
+===== slurm version =====
+$ scontrol --version
+bash: line 1: scontrol: command not found
+[exit=127]
+
+===== cluster name =====
+$ scontrol show config | grep -i -E '^ClusterName'
+bash: line 1: scontrol: command not found
+[exit=1]
+
+===== partitions =====
+$ sinfo -s
+bash: line 1: sinfo: command not found
+[exit=127]
+
+===== nodes (long) =====
+$ sinfo -N -l
+bash: line 1: sinfo: command not found
+[exit=127]
+
+===== node memory/cpus/features =====
+$ sinfo -N -o '%N %P %c %m %f %G %T' | sort -u
+bash: line 1: sinfo: command not found
+[exit=0]
+
+===== high-mem candidates (RealMemory >= 512 GB) =====
+$ sinfo -N -h -o '%N %P %m %c %f' | awk '$3 >= 512000' | sort -u
+bash: line 1: sinfo: command not found
+[exit=0]
+
+===== energy / acct_gather config =====
+$ scontrol show config | grep -i -E 'energy|acctgather|jobacct|PrologFlags|SelectType|OverSubscribe'
+bash: line 1: scontrol: command not found
+[exit=1]
+
+===== acct_gather.conf (if world-readable) =====
+$ ls -l /etc/slurm/acct_gather.conf 2>&1; cat /etc/slurm/acct_gather.conf 2>&1 | grep -v -i password
+ls: cannot access '/etc/slurm/acct_gather.conf': No such file or directory
+cat: /etc/slurm/acct_gather.conf: No such file or directory
+[exit=0]
+
+===== partition sharing policy =====
+$ scontrol show partition | grep -E 'PartitionName|OverSubscribe|ExclusiveUser|MaxTime|AllowAccounts|AllowGroups|AllowQos'
+bash: line 1: scontrol: command not found
+[exit=1]
+
+===== ConsumedEnergy populated? (all users, last 7 days) =====
+$ sacct -S now-7days -a -o JobID,NodeList,Elapsed,ConsumedEnergy,ConsumedEnergyRaw | head -50
+timeout: failed to run command ΓÇÿsacctΓÇÖ: No such file or directory
+(-a denied; falling back to own jobs)
+timeout: failed to run command ΓÇÿsacctΓÇÖ: No such file or directory
+
+===== how many recent jobs have non-zero energy =====
+$ sacct -S now-7days -a -X -n -P -o ConsumedEnergyRaw | awk -F'|' '$1+0>0{n++} END{print n+0, "of", NR, "jobs"}'
+bash: line 1: sacct: command not found
+0 of 0 jobs
+[exit=0]
+
+===== my associations (can I submit?) =====
+$ sacctmgr -n -P show assoc user=$USER format=cluster,account,partition,qos
+bash: line 1: sacctmgr: command not found
+[exit=127]
+
+===== my QOS limits =====
+$ sacctmgr -n -P show qos format=name,maxwall,maxtrespu,flags | head -30
+bash: line 1: sacctmgr: command not found
+[exit=0]
+
+===== my groups =====
+$ id
+uid=3327301(ylee880) gid=2626(gtperson) groups=2626(gtperson),200810(coc-shuttles-access),200926(coc-107a-access),200937(coc-sgd-access),203465(coc-baird-access),203801(coc-cios),204545(coc-deepthought-access),215952(coc-jinx-students),224776(coc-pace-ice-access),224925(coc-pace-ice-students),236794(coc-rg-login),315337(coc-general-access),320975(coc-rover-access),322672(coc-deepspace-access),347647(coc-cs3220-students),369870(coc-hpc-o-rama),2102296(coc-futurama-access),2102588(coc-futurama-students),2227148(coc-futurama-elibigle),2233200(coc-genaccess-access)
+[exit=0]
+
+===== IPMI device nodes =====
+$ ls -l /dev/ipmi* /dev/ipmi/* 2>&1
+ls: cannot access '/dev/ipmi/*': No such file or directory
+crw------- 1 root root 235, 0 Nov  6 16:49 /dev/ipmi0
+[exit=2]
+
+===== ipmitool present =====
+$ command -v ipmitool ipmi-sensors ipmi-dcmi 2>&1
+/usr/bin/ipmitool
+/usr/sbin/ipmi-sensors
+/usr/sbin/ipmi-dcmi
+[exit=0]
+
+===== ipmitool DCMI power (no sudo, single attempt) =====
+$ ipmitool dcmi power reading
+Could not open device at /dev/ipmi0 or /dev/ipmi/0 or /dev/ipmidev/0: No such file or directory
+[exit=1]
+
+===== ipmitool PSU sensors (no sudo, single attempt) =====
+$ ipmitool sdr type 'Power Supply'
+Could not open device at /dev/ipmi0 or /dev/ipmi/0 or /dev/ipmidev/0: No such file or directory
+[exit=1]
+
+===== HPL / BLAS / MPI modules =====
+$ module avail 2>&1 | grep -i -E 'hpl|blas|mkl|mpi|aocl|blis|openmpi|mvapich'
+[exit=1]
+
+===== xhpl on PATH =====
+$ which xhpl
+[exit=1]
+
+===== spack / easybuild hints =====
+$ ls -d /opt/* /usr/local/* 2>/dev/null | grep -i -E 'hpl|intel|oneapi|aocl|spack' | head
+[exit=0]
+
+===== login node lscpu (compute nodes may differ) =====
+$ lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  48
+On-line CPU(s) list:                     0-47
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU family:                              6
+Model:                                   79
+Thread(s) per core:                      2
+Core(s) per socket:                      12
+Socket(s):                               2
+Stepping:                                1
+CPU max MHz:                             2900.0000
+CPU min MHz:                             1200.0000
+BogoMIPS:                                4399.73
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single pti intel_ppin ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdt_a rdseed adx smap intel_pt xsaveopt cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts md_clear flush_l1d ibpb_exit_to_user
+Virtualization:                          VT-x
+L1d cache:                               768 KiB (24 instances)
+L1i cache:                               768 KiB (24 instances)
+L2 cache:                                6 MiB (24 instances)
+L3 cache:                                60 MiB (2 instances)
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-11,24-35
+NUMA node1 CPU(s):                       12-23,36-47
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             KVM: Mitigation: VMX disabled
+Vulnerability L1tf:                      Mitigation; PTE Inversion; VMX conditional cache flushes, SMT vulnerable
+Vulnerability Mds:                       Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerability Meltdown:                  Mitigation; PTI
+Vulnerability Mmio stale data:           Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl and seccomp
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP conditional; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerability Vmscape:                   Mitigation; IBPB before exit to userspace
+[exit=0]
+
+===== login node memory =====
+$ free -g
+               total        used        free      shared  buff/cache   available
+Mem:             251          29          46           0         176         220
+Swap:             15           0          15
+[exit=0]
+
+probe done at 2026-11-08T22:43:51-05:00

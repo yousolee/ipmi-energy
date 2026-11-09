@@ -17,6 +17,20 @@ run() {  # run <title> <command...>
 
 echo "probe run at $(date -Is) by ${USER} on $(hostname -f 2>/dev/null || hostname)"
 
+# `ssh host 'cmd'` gives a non-login shell that skips /etc/profile, so SLURM
+# and Lmod can be missing from PATH (first rg run, 2026-11-08). Load the
+# login environment if sinfo isn't visible yet. Read-only: just sources
+# the system's own profile scripts.
+if ! command -v sinfo >/dev/null 2>&1; then
+    for f in /etc/profile /etc/profile.d/*.sh; do
+        [ -r "$f" ] && . "$f" >/dev/null 2>&1
+    done
+fi
+export -f module ml 2>/dev/null   # make Lmod visible to the `bash -c` children
+
+run "environment" \
+    "echo PATH=\$PATH; command -v sinfo scontrol sacct sacctmgr srun; type -t module; ls -d /opt/slurm* /usr/local/slurm* /etc/slurm* 2>&1"
+
 run "host" "hostname; hostname -f; uname -a"
 run "slurm version" "scontrol --version"
 run "cluster name" "scontrol show config | grep -i -E '^ClusterName'"
