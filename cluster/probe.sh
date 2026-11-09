@@ -41,7 +41,9 @@ run "node memory/cpus/features" \
 run "high-mem candidates (RealMemory >= 512 GB)" \
     "sinfo -N -h -o '%N %P %m %c %f' | awk '\$3 >= 512000' | sort -u"
 run "energy / acct_gather config" \
-    "scontrol show config | grep -i -E 'energy|acctgather|jobacct|PrologFlags|SelectType|OverSubscribe'"
+    "scontrol show config | grep -i -E 'energy|acctgather|jobacct|PrologFlags|SelectType|OverSubscribe|AccountingStorageEnforce|PrivateData'"
+run "high-mem node details (RealMemory >= 512 GB)" \
+    "for n in \$(sinfo -N -h -o '%N %m' | awk '\$2 >= 512000 {print \$1}' | sort -u); do scontrol show node \$n; done"
 run "acct_gather.conf (if world-readable)" \
     "ls -l /etc/slurm/acct_gather.conf 2>&1; cat /etc/slurm/acct_gather.conf 2>&1 | grep -v -i password"
 run "partition sharing policy" \

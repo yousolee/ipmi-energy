@@ -8,8 +8,22 @@ our pipeline and our reading of the SLURM plugin.
 Legend: 🟢 I can do it myself · 🟡 needs my submission rights confirmed ·
 🔴 needs prof/admin.
 
-**Status:** not started — no cluster access yet. Step 0 fills in every
-`CHANGE_ME` below.
+**Status (2026-11-08):** probe done on rg ([probe_results.md](probe_results.md)).
+Target node: **`crush`** (partition `rg-dev`, ~1 TB, 4×10 cores). **Blocked**
+on four things, all 🔴/🟡:
+
+1. **No power source in the job.** `/dev/ipmi0` is root-only, and SLURM has
+   no energy plugin or profiling (`AcctGatherEnergyType` /
+   `AcctGatherProfileType = (null)`). Only option 2.1 below (Jal's
+   collector with admin-granted BMC access) is left. 🔴
+2. **No `sacct` reference.** Step 5 is impossible unless an admin enables
+   `acct_gather_energy/ipmi`. 🔴
+3. **No association.** `sacctmgr show assoc user=ylee880` is empty, so
+   `sbatch` may be rejected. 🟡/🔴
+4. **No HPL/MPI/BLAS module.** Must build OpenBLAS + OpenMPI (with SLURM
+   PMI support, for `srun`) + HPL under `$HOME`, or use a system stack the
+   prof points to. 🟢 once (3) is solved, since the build should run on
+   `crush` itself (compute CPU ≠ login CPU).
 
 ## 0. Probe (🟢, read-only)
 

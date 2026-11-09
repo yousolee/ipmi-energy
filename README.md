@@ -111,24 +111,34 @@ python analysis/sampling_error.py
 
 ## Open questions for the prof
 
-The cluster probe hasn't been run yet (no access as of 2026-10-28); these
-will be narrowed down by `cluster/probe_results.md`.
+From the Rogues Gallery probe on 2026-11-08 (`cluster/probe_results.md`;
+pho not probed yet):
 
-1. **Job submission:** which account/partition/QOS should we use, and may we
-   take one high-mem node **exclusively** for ~45 min for the HPL validation
-   run (`cluster/hpl_job.sbatch`)?
-2. **Energy accounting:** is `AcctGatherEnergyType=acct_gather_energy/ipmi`
-   enabled on pho / Rogues Gallery? With what `EnergyIPMIFrequency`,
-   `EnergyIPMIPowerSensors` (DCMI vs. a specific SDR sensor) and
-   `EnergyIPMICalcAdjustment`? Is hdf5 energy profiling enabled?
-3. **IPMI access:** will our collector read the BMC in-band (`/dev/ipmi0`,
-   needs root or a group/sudo rule) or out-of-band over the BMC network (needs
-   BMC credentials)? Who holds those, and which sensor is "node input power"
-   on these BMCs?
-4. **Node sharing:** are high-mem nodes allocated exclusively or shared
-   (`OverSubscribe`, `SelectTypeParameters=CR_Core...`)? If shared, is the
-   CPU-share split an acceptable estimate for the project, or do we report
-   whole-node energy like SLURM does?
-5. **Idle baselines:** can we get a few minutes of idle time per high-mem
-   node to measure `idle_watts`, or is there historical data?
-6. **HPL:** is there a supported HPL / MKL / AOCL build on these nodes?
+1. **Power data access (the main blocker).** `/dev/ipmi0` is root-only and
+   SLURM's energy plugin is off, so nothing we can run reads node power.
+   Will Jal's collector read BMCs in-band (needs root / a udev group on
+   `/dev/ipmi0`) or out-of-band (needs BMC credentials + network)? Who
+   grants that, and which sensor is "node input power" on these BMCs
+   (DCMI vs. a PSU SDR sensor)?
+2. **SLURM energy accounting.** `AcctGatherEnergyType` and
+   `AcctGatherProfileType` are both `(null)`, so `sacct ConsumedEnergy` is
+   always empty. Would the admins enable `acct_gather_energy/ipmi` (even on
+   one node, e.g. `crush`) so we have a reference to validate against? With
+   which `EnergyIPMIFrequency`?
+3. **Job submission.** `sacctmgr show assoc user=ylee880` returns nothing.
+   Which account / QOS should I use (QOSes: `normal`, `single-node`,
+   `single-chassis`, …), and who adds the association?
+4. **Which "high-mem" node.** The only x86 node ≥ 512 GB is `crush`
+   (`rg-dev`, ~1 TB, 40 cores). Is it OK to hold it **exclusively** for
+   ~45 min for the HPL run (`cluster/hpl_job.sbatch`)? Or do the 500 GB
+   `dash`/`violet`/`flubber8-10` nodes, or aarch64 `kingpin`/`rg-uwing`,
+   count as the high-mem target?
+5. **Node sharing.** Nodes are shared per core (`select/cons_tres` +
+   `CR_CORE`, no `OverSubscribe`/`ExclusiveUser`). Is the CPU-share split
+   (`--attribution cpu_share`) acceptable as an estimate, or should we
+   report whole-node energy like SLURM would?
+6. **HPL stack.** No HPL / MPI / BLAS module exists. Is there a preferred
+   build, or should I build OpenBLAS + OpenMPI + HPL in `$HOME` on `crush`?
+7. **Idle baselines.** Can we get a few minutes of idle time per target node
+   to measure `idle_watts`, or is there historical BMC data?
+8. **pho.** Same questions — I haven't probed it yet.

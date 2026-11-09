@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 # HPL energy-validation run on ONE high-mem node.  DO NOT SUBMIT until the
-# CHANGE_ME values are filled in from probe results and the prof has OK'd it.
+# prof has OK'd it AND the two blockers below are resolved.
+#
+# Target (from cluster/probe_results.md, rg-login 2026-11-08): crush in
+# rg-dev -- the only x86 node with >= 512 GB (1,030,000 MB), 80 CPUs =
+# 4 sockets x 10 cores x 2 threads.
+# BLOCKER 1: no power source inside the job. /dev/ipmi0 is root-only and
+#   AcctGatherEnergyType/AcctGatherProfileType are (null), so neither the
+#   ipmitool sampler below nor --profile=energy will work. Needs Jal's
+#   collector (with admin-granted BMC access) running during the job.
+# BLOCKER 2: no HPL/MPI/BLAS module was found; build HPL + OpenBLAS +
+#   OpenMPI under $HOME first and point XHPL / MODULES_OR_PATH at it.
+# Also unconfirmed: `sacctmgr show assoc user=$USER` returned nothing, so
+#   submission may be rejected until an account/association exists.
 #
 #   phase 1: idle baseline   (node allocated exclusively, nothing running)
 #   phase 2: HPL             (sized for ~15 min from this node's lscpu/meminfo)
@@ -12,15 +24,16 @@
 #   HPL.dat, hpl.out, lscpu.txt, meminfo.txt, env.txt
 #
 #SBATCH --job-name=hpl-energy
-#SBATCH --partition=CHANGE_ME          # high-mem partition from probe
-#SBATCH --nodelist=CHANGE_ME           # one specific high-mem node
+#SBATCH --partition=rg-dev             # crush's partition (MaxTime 1-01:00:00)
+#SBATCH --nodelist=crush               # only x86 node >= 512 GB (~1 TB)
 #SBATCH --nodes=1
 #SBATCH --exclusive                    # whole node: BMC power is whole-node
-#SBATCH --ntasks-per-node=CHANGE_ME    # physical cores on that node (from scontrol show node)
+#SBATCH --ntasks-per-node=40           # 4 sockets x 10 cores (sinfo S:C:T 4:10:2); one rank per physical core
 #SBATCH --time=00:45:00                # 5 idle + ~15 HPL + 5 tail + slack
 #SBATCH --output=%x-%j.out
-## If energy profiling is enabled on the cluster (AcctGatherProfileType=hdf5),
-## these give a per-sample node power series via `sh5util -j <jobid>`:
+## Energy profiling is OFF on rg (AcctGatherProfileType=(null), 2026-11-08).
+## If an admin enables hdf5 profiling + the ipmi energy plugin, these give a
+## per-sample node power series via `sh5util -j <jobid>`:
 ##SBATCH --profile=energy
 ##SBATCH --acctg-freq=energy=5
 
@@ -31,10 +44,12 @@ TAIL_S=${TAIL_S:-300}
 TARGET_HPL_S=${TARGET_HPL_S:-900}
 POLL_S=${POLL_S:-1}
 NB=${NB:-192}
-XHPL=${XHPL:-xhpl}                     # path to the HPL binary
+XHPL=${XHPL:-$HOME/opt/hpl/bin/xhpl}   # path to the HPL binary (built in $HOME)
 
-# CHANGE_ME: load the MPI/BLAS/HPL stack found by the probe, e.g.
-# module load openmpi hpl
+# CHANGE_ME: no MPI/BLAS/HPL module exists on rg (probe 2026-11-08). After
+# building them under $HOME, put them on PATH / LD_LIBRARY_PATH here, e.g.
+# export PATH=$HOME/opt/openmpi/bin:$PATH
+# export LD_LIBRARY_PATH=$HOME/opt/openmpi/lib:$HOME/opt/openblas/lib:${LD_LIBRARY_PATH:-}
 
 RUN_DIR="$HOME/ipmi-energy-runs/${SLURM_JOB_ID}"
 mkdir -p "$RUN_DIR"

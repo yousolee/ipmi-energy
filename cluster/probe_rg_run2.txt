@@ -1,0 +1,328 @@
+probe run at 2026-11-08T22:47:08-05:00 by ylee880 on rg-login.crnch.gatech.edu
+
+===== environment =====
+$ echo PATH=$PATH; command -v sinfo scontrol sacct sacctmgr srun; type -t module; ls -d /opt/slurm* /usr/local/slurm* /etc/slurm* 2>&1
+PATH=/nethome/ylee880/bin:/nethome/ylee880/.local/bin:/opt/slurm/current/bin:/nethome/ylee880/.local/bin:/nethome/ylee880/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+/opt/slurm/current/bin/sinfo
+/opt/slurm/current/bin/scontrol
+/opt/slurm/current/bin/sacct
+/opt/slurm/current/bin/sacctmgr
+/opt/slurm/current/bin/srun
+function
+ls: cannot access '/usr/local/slurm*': No such file or directory
+/etc/slurm
+/opt/slurm
+[exit=2]
+
+===== host =====
+$ hostname; hostname -f; uname -a
+rg-login.crnch.gatech.edu
+rg-login.crnch.gatech.edu
+Linux rg-login.crnch.gatech.edu 5.15.0-203-generic #213-Ubuntu SMP Fri Oct 23 13:21:06 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+[exit=0]
+
+===== slurm version =====
+$ scontrol --version
+slurm 25.05.5
+[exit=0]
+
+===== cluster name =====
+$ scontrol show config | grep -i -E '^ClusterName'
+ClusterName             = cluster
+[exit=0]
+
+===== partitions =====
+$ sinfo -s
+PARTITION      AVAIL  TIMELIMIT   NODES(A/I/O/T) NODELIST
+rg-dev*           up 1-01:00:00          0/1/0/1 crush
+rg-nextgen-hpc    up 1-00:00:00       11/17/1/29 dash[1-4],flubber[6-7,10],frozone[1-4],instinct,johnny-rv5-[1-2,5],kingpin[1-2],octavius[1-8],quorra[1-2],rg-uwing-[1-2]
+rg-violet         up   12:00:00          2/0/0/2 violet[1-2]
+rg-neuro          up 1-00:00:00          0/8/1/9 brainard-[1-3],cable1,magpie5-1,rudi[2-3,8-9]
+rg-fpga           up 1-00:00:00          2/5/0/7 flubber[1-5,8-9]
+[exit=0]
+
+===== nodes (long) =====
+$ sinfo -N -l
+Sun Nov 08 22:47:08 2026
+NODELIST      NODES      PARTITION       STATE CPUS    S:C:T MEMORY TMP_DISK WEIGHT AVAIL_FE REASON              
+brainard-1        1       rg-neuro        idle 8       1:4:2  31000        0      1   (null) none                
+brainard-2        1       rg-neuro        idle 8       1:4:2  15500        0      1   (null) none                
+brainard-3        1       rg-neuro        idle 8       1:4:2  15500        0      1   (null) none                
+cable1            1       rg-neuro        idle 32     1:16:2 128200        0      1 amd,thre none                
+crush             1        rg-dev*        idle 80     4:10:2 103000        0      1      x86 none                
+dash1             1 rg-nextgen-hpc       inval 192    2:48:2 510000        0      1 x86,xeon gres/gpu GRES autode
+dash2             1 rg-nextgen-hpc       mixed 192    2:48:2 510000        0      1 x86,xeon none                
+dash3             1 rg-nextgen-hpc       mixed 192    2:48:2 510000        0      1 x86,xeon none                
+dash4             1 rg-nextgen-hpc        idle 192    2:48:2 510000        0      1 x86,xeon none                
+flubber1          1        rg-fpga        idle 40     2:10:2 240000        0      1 xilinx-f none                
+flubber2          1        rg-fpga        idle 64     2:16:2 380000        0      1 intel-fp none                
+flubber3          1        rg-fpga        idle 64     2:16:2 380000        0      1 intel-fp none                
+flubber4          1        rg-fpga        idle 128    2:32:2 240000        0      1 xilinx-f none                
+flubber5          1        rg-fpga        idle 128    2:32:2 240000        0      1 xilinx-f none                
+flubber6          1 rg-nextgen-hpc   allocated 64     2:32:1 250000        0      1   (null) none                
+flubber7          1 rg-nextgen-hpc       mixed 64     2:32:1 240000        0      1   (null) none                
+flubber8          1        rg-fpga   allocated 128    2:32:2 510000        0      1   (null) none                
+flubber9          1        rg-fpga       mixed 128    2:32:2 510000        0      1   (null) none                
+flubber10         1 rg-nextgen-hpc        idle 128    2:32:2 510000        0      1 x86,xeon none                
+frozone1          1 rg-nextgen-hpc   allocated 128    2:32:2 251900   921140      1 x86,xeon none                
+frozone2          1 rg-nextgen-hpc   allocated 128    2:32:2 251900   921140      1 x86,xeon none                
+frozone3          1 rg-nextgen-hpc    reserved 128    2:32:2 251900   921140      1 x86,xeon none                
+frozone4          1 rg-nextgen-hpc   allocated 128    2:32:2 251900   921140      1 x86,xeon none                
+instinct          1 rg-nextgen-hpc       mixed 256    2:64:2 510000        0      1   (null) none                
+johnny-rv5-1      1 rg-nextgen-hpc        idle 4       1:4:1  15700        0      1 riscv,u7 none                
+johnny-rv5-2      1 rg-nextgen-hpc        idle 1       1:1:1    900        0      1   (null) none                
+johnny-rv5-5      1 rg-nextgen-hpc        idle 64     1:64:1 128887        0      1 riscv,rh none                
+kingpin1          1 rg-nextgen-hpc        idle 80     1:80:1 514000        0      1 aarch64, none                
+kingpin2          1 rg-nextgen-hpc        idle 80     1:80:1 514000        0      1 aarch64, none                
+magpie5-1         1       rg-neuro       down* 4       2:2:1   7700        0      1   (null) Not responding      
+octavius1         1 rg-nextgen-hpc        idle 48     4:12:1  16000        0      1   (null) none                
+octavius2         1 rg-nextgen-hpc        idle 48     4:12:1  16000        0      1   (null) none                
+octavius3         1 rg-nextgen-hpc        idle 48     4:12:1  16000        0      1   (null) none                
+octavius4         1 rg-nextgen-hpc        idle 48     4:12:1  16000        0      1   (null) none                
+octavius5         1 rg-nextgen-hpc        idle 48     4:12:1  16000        0      1   (null) none                
+octavius6         1 rg-nextgen-hpc        idle 48     4:12:1  16000        0      1   (null) none                
+octavius7         1 rg-nextgen-hpc        idle 48     4:12:1  16000        0      1   (null) none                
+octavius8         1 rg-nextgen-hpc        idle 48     4:12:1  16000        0      1   (null) none                
+quorra1           1 rg-nextgen-hpc       mixed 128    2:32:2 252000   898600      1 x86,epyc none                
+quorra2           1 rg-nextgen-hpc       mixed 128    2:32:2 250000   898600      1 x86,epyc none                
+rg-uwing-1        1 rg-nextgen-hpc   allocated 72     1:72:1 587000        0      1 aarch64, none                
+rg-uwing-2        1 rg-nextgen-hpc        idle 72     1:72:1 587000        0      1 aarch64, none                
+rudi2             1       rg-neuro        idle 8       2:4:1  30000        0      1   (null) none                
+rudi3             1       rg-neuro        idle 8       2:4:1  62000        0      1   (null) none                
+rudi8             1       rg-neuro        idle 14     1:14:1 124700        0      1   (null) none                
+rudi9             1       rg-neuro        idle 14     1:14:1 124700        0      1   (null) none                
+violet1           1      rg-violet   allocated 128    2:32:2 510000   695900      1 x86,xeon none                
+violet2           1      rg-violet      mixed- 64     2:32:1 510000        0      1 x86,xeon none                
+[exit=0]
+
+===== node memory/cpus/features =====
+$ sinfo -N -o '%N %P %c %m %f %G %T' | sort -u
+brainard-1 rg-neuro 8 31000 (null) (null) idle
+brainard-2 rg-neuro 8 15500 (null) (null) idle
+brainard-3 rg-neuro 8 15500 (null) (null) idle
+cable1 rg-neuro 32 128200 amd,threadripper,ubuntu22,xilinx-fpga,alveo-u250 gpu:a5000:2(S:0),fpga:alveou250:1 idle
+crush rg-dev* 80 1030000 x86 (null) idle
+dash1 rg-nextgen-hpc 192 510000 x86,xeon9468,ubuntu,hbm,dash1 gpu:1,dpu:bf3:2 inval
+dash2 rg-nextgen-hpc 192 510000 x86,xeon9468,ubuntu,hbm,dash2 gpu:l40s:1(S:1),dpu:bf3:2 mixed
+dash3 rg-nextgen-hpc 192 510000 x86,xeon9468,ubuntu,hbm,dash3,intel-gpu gpu:max_1100:1,dpu:bf3:2 mixed
+dash4 rg-nextgen-hpc 192 510000 x86,xeon9468,ubuntu,hbm,dash4,intel-gpu gpu:max_1100:1,dpu:bf3:2 idle
+flubber10 rg-nextgen-hpc 128 510000 x86,xeon6338,ubuntu,flubber10 dpu:bf2:4 idle
+flubber1 rg-fpga 40 240000 xilinx-fpga fpga:alveou50:2 idle
+flubber2 rg-fpga 64 380000 intel-fpga fpga:arria10:1 idle
+flubber3 rg-fpga 64 380000 intel-fpga fpga:stratix10:1 idle
+flubber4 rg-fpga 128 240000 xilinx-fgpa fpga:alveou280:1 idle
+flubber5 rg-fpga 128 240000 xilinx-fpga fpga:alveou280:2 idle
+flubber6 rg-nextgen-hpc 64 250000 (null) dpu:bf1:1,dpu:bf2:1 allocated
+flubber7 rg-nextgen-hpc 64 240000 (null) dpu:bf1:1,dpu:bf2:1 mixed
+flubber8 rg-fpga 128 510000 (null) (null) allocated
+flubber9 rg-fpga 128 510000 (null) (null) mixed
+frozone1 rg-nextgen-hpc 128 251900 x86,xeon8352y,rhel,nvidia-gpu gpu:a100:2(S:0-1) allocated
+frozone2 rg-nextgen-hpc 128 251900 x86,xeon8352y,rhel,nvidia-gpu gpu:a100:2(S:0-1) allocated
+frozone3 rg-nextgen-hpc 128 251900 x86,xeon8352y,rhel,nvidia-gpu gpu:a100:1(S:1) reserved
+frozone4 rg-nextgen-hpc 128 251900 x86,xeon8352y,rhel,nvidia-gpu gpu:a100:2(S:0-1) allocated
+instinct rg-nextgen-hpc 256 510000 (null) gpu:mi210:2(S:0-7) mixed
+johnny-rv5-1 rg-nextgen-hpc 4 15700 riscv,u740,ubuntu (null) idle
+johnny-rv5-2 rg-nextgen-hpc 1 900 (null) (null) idle
+johnny-rv5-5 rg-nextgen-hpc 64 128887 riscv,rhel (null) idle
+kingpin1 rg-nextgen-hpc 80 514000 aarch64,ampereq8030,ubuntu,nvidia-gpu gpu:a100:2(S:0),dpu:bf2:2 idle
+kingpin2 rg-nextgen-hpc 80 514000 aarch64,ampereq8030,ubuntu,nvidia-gpu gpu:a100:2(S:0),dpu:bf2:2 idle
+magpie5-1 rg-neuro 4 7700 (null) (null) down*
+NODELIST PARTITION CPUS MEMORY AVAIL_FEATURES GRES STATE
+octavius1 rg-nextgen-hpc 48 16000 (null) (null) idle
+octavius2 rg-nextgen-hpc 48 16000 (null) (null) idle
+octavius3 rg-nextgen-hpc 48 16000 (null) (null) idle
+octavius4 rg-nextgen-hpc 48 16000 (null) (null) idle
+octavius5 rg-nextgen-hpc 48 16000 (null) (null) idle
+octavius6 rg-nextgen-hpc 48 16000 (null) (null) idle
+octavius7 rg-nextgen-hpc 48 16000 (null) (null) idle
+octavius8 rg-nextgen-hpc 48 16000 (null) (null) idle
+quorra1 rg-nextgen-hpc 128 252000 x86,epyc7502,ubuntu,nvidia-gpu gpu:a30:4(S:0-1),dpu:bf2:1 mixed
+quorra2 rg-nextgen-hpc 128 250000 x86,epyc7502,ubuntu,nvidia-gpu gpu:a30:4(S:0-1),dpu:bf2:1 mixed
+rg-uwing-1 rg-nextgen-hpc 72 587000 aarch64,grace,ubuntu,nvidia-gpu gpu:H200:1(S:0) allocated
+rg-uwing-2 rg-nextgen-hpc 72 587000 aarch64,grace,ubuntu,nvidia-gpu gpu:H200:1(S:0) idle
+rudi2 rg-neuro 8 30000 (null) (null) idle
+rudi3 rg-neuro 8 62000 (null) (null) idle
+rudi8 rg-neuro 14 124700 (null) (null) idle
+rudi9 rg-neuro 14 124700 (null) (null) idle
+violet1 rg-violet 128 510000 x86,xeon6454s,rhel,nvidia-gpu gpu:h100:1(S:1),dpu:bf3:1 allocated
+violet2 rg-violet 64 510000 x86,xeon6454s,rhel,nvidia-gpu gpu:a100:1(S:1),dpu:bf3:1 mixed-
+[exit=0]
+
+===== high-mem candidates (RealMemory >= 512 GB) =====
+$ sinfo -N -h -o '%N %P %m %c %f' | awk '$3 >= 512000' | sort -u
+crush rg-dev* 1030000 80 x86
+kingpin1 rg-nextgen-hpc 514000 80 aarch64,ampereq8030,ubuntu,nvidia-gpu
+kingpin2 rg-nextgen-hpc 514000 80 aarch64,ampereq8030,ubuntu,nvidia-gpu
+rg-uwing-1 rg-nextgen-hpc 587000 72 aarch64,grace,ubuntu,nvidia-gpu
+rg-uwing-2 rg-nextgen-hpc 587000 72 aarch64,grace,ubuntu,nvidia-gpu
+[exit=0]
+
+===== energy / acct_gather config =====
+$ scontrol show config | grep -i -E 'energy|acctgather|jobacct|PrologFlags|SelectType|OverSubscribe'
+AccountingStorageTRES   = cpu,mem,energy,node,billing,fs/disk,vmem,pages,gres/dpu,gres/dpu:bf1,gres/dpu:bf2,gres/dpu:bf3,gres/fpga,gres/fpga:alveou250,gres/fpga:alveou280,gres/fpga:alveou50,gres/fpga:arria10,gres/fpga:stratix10,gres/gpu,gres/gpu:a100,gres/gpu:a100_1g.5gb,gres/gpu:a30,gres/gpu:h100,gres/gpu:h200,gres/gpu:l40s,gres/gpu:max_1100,gres/gpu:mi210,gres/gpumem,gres/gpuutil
+AcctGatherEnergyType    = (null)
+AcctGatherFilesystemType = (null)
+AcctGatherInterconnectType = (null)
+AcctGatherNodeFreq      = 0 sec
+AcctGatherProfileType   = (null)
+JobAcctGatherFrequency  = 10
+JobAcctGatherType       = jobacct_gather/linux
+JobAcctGatherParams     = (null)
+PrologFlags             = Alloc,Contain,X11
+SelectType              = select/cons_tres
+SelectTypeParameters    = CR_CORE
+[exit=0]
+
+===== acct_gather.conf (if world-readable) =====
+$ ls -l /etc/slurm/acct_gather.conf 2>&1; cat /etc/slurm/acct_gather.conf 2>&1 | grep -v -i password
+ls: cannot access '/etc/slurm/acct_gather.conf': No such file or directory
+cat: /etc/slurm/acct_gather.conf: No such file or directory
+[exit=0]
+
+===== partition sharing policy =====
+$ scontrol show partition | grep -E 'PartitionName|OverSubscribe|ExclusiveUser|MaxTime|AllowAccounts|AllowGroups|AllowQos'
+PartitionName=rg-dev
+   AllowGroups=ALL AllowAccounts=ALL AllowQos=ALL
+   DefaultTime=01:00:00 DisableRootJobs=NO ExclusiveUser=NO ExclusiveTopo=NO GraceTime=0 Hidden=NO
+   MaxNodes=UNLIMITED MaxTime=1-01:00:00 MinNodes=0 LLN=NO MaxCPUsPerNode=UNLIMITED MaxCPUsPerSocket=UNLIMITED
+   PriorityJobFactor=1 PriorityTier=1 RootOnly=NO ReqResv=NO OverSubscribe=NO
+PartitionName=rg-nextgen-hpc
+   AllowGroups=ALL AllowAccounts=ALL AllowQos=ALL
+   DefaultTime=01:00:00 DisableRootJobs=NO ExclusiveUser=NO ExclusiveTopo=NO GraceTime=0 Hidden=NO
+   MaxNodes=UNLIMITED MaxTime=1-00:00:00 MinNodes=0 LLN=NO MaxCPUsPerNode=UNLIMITED MaxCPUsPerSocket=UNLIMITED
+   PriorityJobFactor=1 PriorityTier=1 RootOnly=NO ReqResv=NO OverSubscribe=NO
+PartitionName=rg-violet
+   AllowGroups=ALL AllowAccounts=ALL AllowQos=ALL
+   DefaultTime=01:00:00 DisableRootJobs=NO ExclusiveUser=NO ExclusiveTopo=NO GraceTime=0 Hidden=NO
+   MaxNodes=UNLIMITED MaxTime=12:00:00 MinNodes=0 LLN=NO MaxCPUsPerNode=UNLIMITED MaxCPUsPerSocket=UNLIMITED
+   PriorityJobFactor=1 PriorityTier=1 RootOnly=NO ReqResv=NO OverSubscribe=NO
+PartitionName=rg-neuro
+   AllowGroups=ALL AllowAccounts=ALL AllowQos=ALL
+   DefaultTime=01:00:00 DisableRootJobs=NO ExclusiveUser=NO ExclusiveTopo=NO GraceTime=0 Hidden=NO
+   MaxNodes=UNLIMITED MaxTime=1-00:00:00 MinNodes=0 LLN=NO MaxCPUsPerNode=UNLIMITED MaxCPUsPerSocket=UNLIMITED
+   PriorityJobFactor=1 PriorityTier=1 RootOnly=NO ReqResv=NO OverSubscribe=NO
+PartitionName=rg-fpga
+   AllowGroups=ALL AllowAccounts=ALL AllowQos=ALL
+   DefaultTime=01:00:00 DisableRootJobs=NO ExclusiveUser=NO ExclusiveTopo=NO GraceTime=0 Hidden=NO
+   MaxNodes=UNLIMITED MaxTime=1-00:00:00 MinNodes=0 LLN=NO MaxCPUsPerNode=UNLIMITED MaxCPUsPerSocket=UNLIMITED
+   PriorityJobFactor=1 PriorityTier=1 RootOnly=NO ReqResv=NO OverSubscribe=NO
+[exit=0]
+
+===== ConsumedEnergy populated? (all users, last 7 days) =====
+$ sacct -S now-7days -a -o JobID,NodeList,Elapsed,ConsumedEnergy,ConsumedEnergyRaw | head -50
+JobID               NodeList    Elapsed ConsumedEnergy ConsumedEnergyRaw 
+------------ --------------- ---------- -------------- ----------------- 
+
+===== how many recent jobs have non-zero energy =====
+$ sacct -S now-7days -a -X -n -P -o ConsumedEnergyRaw | awk -F'|' '$1+0>0{n++} END{print n+0, "of", NR, "jobs"}'
+0 of 0 jobs
+[exit=0]
+
+===== my associations (can I submit?) =====
+$ sacctmgr -n -P show assoc user=$USER format=cluster,account,partition,qos
+[exit=0]
+
+===== my QOS limits =====
+$ sacctmgr -n -P show qos format=name,maxwall,maxtrespu,flags | head -30
+normal|||
+single-node|||
+single-chassis|||
+two-chassis|||
+four-chassis|||
+[exit=0]
+
+===== my groups =====
+$ id
+uid=3327301(ylee880) gid=2626(gtperson) groups=2626(gtperson),200810(coc-shuttles-access),200926(coc-107a-access),200937(coc-sgd-access),203465(coc-baird-access),203801(coc-cios),204545(coc-deepthought-access),215952(coc-jinx-students),224776(coc-pace-ice-access),224925(coc-pace-ice-students),236794(coc-rg-login),315337(coc-general-access),320975(coc-rover-access),322672(coc-deepspace-access),347647(coc-cs3220-students),369870(coc-hpc-o-rama),2102296(coc-futurama-access),2102588(coc-futurama-students),2227148(coc-futurama-elibigle),2233200(coc-genaccess-access)
+[exit=0]
+
+===== IPMI device nodes =====
+$ ls -l /dev/ipmi* /dev/ipmi/* 2>&1
+ls: cannot access '/dev/ipmi/*': No such file or directory
+crw------- 1 root root 235, 0 Nov  6 16:49 /dev/ipmi0
+[exit=2]
+
+===== ipmitool present =====
+$ command -v ipmitool ipmi-sensors ipmi-dcmi 2>&1
+/usr/bin/ipmitool
+/usr/sbin/ipmi-sensors
+/usr/sbin/ipmi-dcmi
+[exit=0]
+
+===== ipmitool DCMI power (no sudo, single attempt) =====
+$ ipmitool dcmi power reading
+Could not open device at /dev/ipmi0 or /dev/ipmi/0 or /dev/ipmidev/0: No such file or directory
+[exit=1]
+
+===== ipmitool PSU sensors (no sudo, single attempt) =====
+$ ipmitool sdr type 'Power Supply'
+Could not open device at /dev/ipmi0 or /dev/ipmi/0 or /dev/ipmidev/0: No such file or directory
+[exit=1]
+
+===== HPL / BLAS / MPI modules =====
+$ module avail 2>&1 | grep -i -E 'hpl|blas|mkl|mpi|aocl|blis|openmpi|mvapich'
+[exit=1]
+
+===== xhpl on PATH =====
+$ which xhpl
+[exit=1]
+
+===== spack / easybuild hints =====
+$ ls -d /opt/* /usr/local/* 2>/dev/null | grep -i -E 'hpl|intel|oneapi|aocl|spack' | head
+[exit=0]
+
+===== login node lscpu (compute nodes may differ) =====
+$ lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  48
+On-line CPU(s) list:                     0-47
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU family:                              6
+Model:                                   79
+Thread(s) per core:                      2
+Core(s) per socket:                      12
+Socket(s):                               2
+Stepping:                                1
+CPU max MHz:                             2900.0000
+CPU min MHz:                             1200.0000
+BogoMIPS:                                4399.73
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single pti intel_ppin ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdt_a rdseed adx smap intel_pt xsaveopt cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts md_clear flush_l1d ibpb_exit_to_user
+Virtualization:                          VT-x
+L1d cache:                               768 KiB (24 instances)
+L1i cache:                               768 KiB (24 instances)
+L2 cache:                                6 MiB (24 instances)
+L3 cache:                                60 MiB (2 instances)
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-11,24-35
+NUMA node1 CPU(s):                       12-23,36-47
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             KVM: Mitigation: VMX disabled
+Vulnerability L1tf:                      Mitigation; PTE Inversion; VMX conditional cache flushes, SMT vulnerable
+Vulnerability Mds:                       Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerability Meltdown:                  Mitigation; PTI
+Vulnerability Mmio stale data:           Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl and seccomp
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP conditional; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerability Vmscape:                   Mitigation; IBPB before exit to userspace
+[exit=0]
+
+===== login node memory =====
+$ free -g
+               total        used        free      shared  buff/cache   available
+Mem:             251          29          46           0         176         220
+Swap:             15           0          15
+[exit=0]
+
+probe done at 2026-11-08T22:47:09-05:00
